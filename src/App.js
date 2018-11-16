@@ -1,25 +1,60 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
+import List from './components/List'
+import axios from 'axios';
 
 class App extends Component {
+  constructor () {
+    super()
+
+    this.state = {
+      userInput: '',
+      url: '/api/items',
+      list: [],
+    }
+  }
+
+  updateUserInput(value) {
+    this.setState({
+      userInput: value
+    })
+  }
+
+  componentDidMount() {
+    axios.get( this.state.url ).then( res => {
+      this.setState({ 
+          list: res.data,
+      });
+    });
+  }
+
+  createItem(event) {
+      let text = this.state.userInput;
+      let promise = axios.post( this.state.url, {text} )
+      promise.then( res => {
+        console.log(res)
+        this.setState({
+          list: res.data, 
+          userInput: ''
+          });
+      });
+      event.preventDefault();
+    }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        <div className="inputs">
+          <form onSubmit={(event) => this.createItem(event)}>
+            <input onChange={(event) => this.updateUserInput(event.target.value)} value={this.state.userInput} />
+            <button onClick={(event) => this.createItem(event)} >add</button>
+          </form>
+        </div>
+        <div className="List">
+          <span><b>List</b></span>
+          <List list={this.state.list} />
+        </div>
       </div>
     );
   }
